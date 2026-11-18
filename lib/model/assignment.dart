@@ -10,7 +10,7 @@ class Assignment {
   final String _id;
   final String _courseId;
   String _title;
-  DateTime dueDate;
+  DateTime? dueDate;
   AssignmentType type;
   bool _isCompleted;
   final List<WorkStep> _steps;
@@ -19,14 +19,14 @@ class Assignment {
     required String id,
     required String courseId,
     required String title,
-    required this.dueDate,
+    this.dueDate,
     this.type = AssignmentType.homework,
-    this._isCompleted = false,
+    bool isCompleted = false,
     List<WorkStep>? steps,
   }) : _id = id.trim(),
        _courseId = courseId.trim(),
        _title = title.trim(),
-       // if we just did _steps = steps ?? [], then outside code could do assignment.steps.clear() and wipe out our list.
+       _isCompleted = isCompleted,
        _steps = steps != null ? List<WorkStep>.from(steps) : [] {
     if (_id.isEmpty) {
       throw ArgumentError('assignment id cannot be empty');
@@ -46,7 +46,8 @@ class Assignment {
 
   List<WorkStep> get steps => List.unmodifiable(_steps);
 
-  bool get isOverdue => !_isCompleted && DateTime.now().isAfter(dueDate);
+  bool get isOverdue =>
+      !_isCompleted && dueDate != null && DateTime.now().isAfter(dueDate!);
 
   set title(String newTitle) {
     final cleaned = newTitle.trim();
@@ -95,12 +96,10 @@ class Assignment {
     return completedCount / _steps.length;
   }
 
-  // show only the steps we havent checked off yet
   List<WorkStep> get pendingSteps {
     return _steps.where((s) => !s.isCompleted).toList();
   }
 
-  // sum of minutes left on all unfinished steps
   int get remainingMinutes {
     var total = 0;
     for (final step in pendingSteps) {
@@ -109,7 +108,6 @@ class Assignment {
     return total;
   }
 
-  // mark this assignment and all its steps finished
   void completeAll() {
     _isCompleted = true;
     for (final step in _steps) {
