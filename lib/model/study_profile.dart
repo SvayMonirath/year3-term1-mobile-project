@@ -14,13 +14,11 @@ class StudyProfile {
   StudyProfile({
     int dailyStudyGoalMinutes = 120,
     int? dailyWorkloadLimitMinutes,
-    int stepDurationMinutes = 25,
-    int breakDurationMinutes = 5,
+    this._stepDurationMinutes = 25,
+    this._breakDurationMinutes = 5,
   }) : _dailyStudyGoalMinutes = dailyStudyGoalMinutes,
        _dailyWorkloadLimitMinutes = dailyWorkloadLimitMinutes ??
-           (dailyStudyGoalMinutes > 240 ? dailyStudyGoalMinutes : 240),
-       _stepDurationMinutes = stepDurationMinutes,
-       _breakDurationMinutes = breakDurationMinutes {
+           (dailyStudyGoalMinutes > 240 ? dailyStudyGoalMinutes : 240) {
     _validate(
       dailyStudyGoalMinutes: _dailyStudyGoalMinutes,
       dailyWorkloadLimitMinutes: _dailyWorkloadLimitMinutes,

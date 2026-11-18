@@ -5,11 +5,10 @@ import '../model/recommended_action.dart';
 import 'study_service.dart';
 
 class FocusService {
-  final StudyService _studyService;
+  final StudyService studyService;
   final List<FocusSession> _sessions = [];
 
-  FocusService({required StudyService studyService})
-      : _studyService = studyService;
+  FocusService({required this.studyService});
 
   List<FocusSession> get sessions => List.unmodifiable(_sessions);
 
@@ -22,7 +21,7 @@ class FocusService {
     required int minutesSpent,
     DateTime? completedAt,
   }) {
-    final course = _studyService.findCourseById(courseId);
+    final course = studyService.findCourseById(courseId);
     if (course == null) {
       throw ArgumentError('course not found');
     }
@@ -68,7 +67,7 @@ class FocusService {
       completedAt: completedAt,
     );
 
-    _studyService.completeStep(
+    studyService.completeStep(
       assignmentId: assignmentId,
       stepId: stepId,
     );
@@ -108,7 +107,7 @@ class FocusService {
 
   // Progress towards daily study goal
   double getDailyGoalProgress(DateTime date) {
-    final goal = _studyService.profile.dailyStudyGoalMinutes;
+    final goal = studyService.profile.dailyStudyGoalMinutes;
     if (goal == 0) return 1.0;
     return getDailyStudyMinutes(date) / goal;
   }
@@ -116,7 +115,7 @@ class FocusService {
   // Check if daily study goal has been reached
   bool isDailyGoalMet(DateTime date) {
     return getDailyStudyMinutes(date) >=
-        _studyService.profile.dailyStudyGoalMinutes;
+        studyService.profile.dailyStudyGoalMinutes;
   }
 
   // Calculate consecutive study streak (today is pending until midnight)
@@ -265,7 +264,7 @@ class FocusService {
 
     final List<_AssignmentCandidate> candidates = [];
 
-    for (final course in _studyService.courses) {
+    for (final course in studyService.courses) {
       for (final assignment in course.activeAssignments) {
         if (assignment.pendingSteps.isEmpty) continue;
 

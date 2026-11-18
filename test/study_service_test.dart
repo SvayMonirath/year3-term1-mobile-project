@@ -112,7 +112,7 @@ void main() {
     test('calculates daily workload minutes and detects overload', () {
       final targetDate = DateTime(2026, 11, 20);
 
-      final a1 = service.createAssignmentForCourse(
+      service.createAssignmentForCourse(
         courseId: 'c1',
         assignmentId: 'a1',
         title: 'Assignment 1',
@@ -125,7 +125,7 @@ void main() {
         estimatedMinutes: 150,
       );
 
-      final a2 = service.createAssignmentForCourse(
+      service.createAssignmentForCourse(
         courseId: 'c1',
         assignmentId: 'a2',
         title: 'Assignment 2',

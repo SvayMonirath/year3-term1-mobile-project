@@ -21,12 +21,11 @@ class Assignment {
     required String title,
     this.dueDate,
     this.type = AssignmentType.homework,
-    bool isCompleted = false,
+    this._isCompleted = false,
     List<WorkStep>? steps,
   }) : _id = id.trim(),
        _courseId = courseId.trim(),
        _title = title.trim(),
-       _isCompleted = isCompleted,
        _steps = steps != null ? List<WorkStep>.from(steps) : [] {
     if (_id.isEmpty) {
       throw ArgumentError('assignment id cannot be empty');

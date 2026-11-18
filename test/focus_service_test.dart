@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile_project/model/course.dart';
-import 'package:mobile_project/model/assignment.dart';
 import 'package:mobile_project/service/study_service.dart';
 import 'package:mobile_project/service/focus_service.dart';
 
@@ -170,7 +169,7 @@ void main() {
       final now = DateTime(2026, 11, 19, 12, 0);
 
       // Assignment 1 has 3 steps (Course 1)
-      final a1 = studyService.createAssignmentForCourse(
+      studyService.createAssignmentForCourse(
         courseId: 'c1',
         assignmentId: 'a1',
         title: 'Mobile Milestone',
@@ -188,7 +187,7 @@ void main() {
       );
 
       // Assignment 2 has 2 steps (Course 2)
-      final a2 = studyService.createAssignmentForCourse(
+      studyService.createAssignmentForCourse(
         courseId: 'c2',
         assignmentId: 'a2',
         title: 'Cloud Lab',
