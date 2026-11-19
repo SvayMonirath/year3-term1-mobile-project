@@ -196,7 +196,7 @@ class FocusService {
     );
   }
 
-  // recommendatino base on when is it due, how close are you to finishing the assignment, were you working on it recently then paused, type of assignment, and how big a task is
+  // calculate priority score for an assignment
   double calculatePriorityScore(
     Assignment assignment, {
     DateTime? relativeNow,
