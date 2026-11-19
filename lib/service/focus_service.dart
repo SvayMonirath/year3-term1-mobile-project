@@ -196,7 +196,7 @@ class FocusService {
     );
   }
 
-  // calculate priority score for an assignment
+  // recommendatino base on when is it due, how close are you to finishing the assignment, were you working on it recently then paused, type of assignment, and how big a task is
   double calculatePriorityScore(
     Assignment assignment, {
     DateTime? relativeNow,
@@ -244,15 +244,21 @@ class FocusService {
         break;
     }
 
-    final burdenBonus =
-        (assignment.remainingMinutes > 120 &&
-            hoursRemaining != null &&
-            hoursRemaining <= 48 &&
-            hoursRemaining > 0)
-        ? 10.0
-        : 0.0;
+    // extra points for medium and heavy tasks due in next 2 days
+    double heavyTaskBonus = 0.0;
+    if (hoursRemaining != null && hoursRemaining <= 48 && hoursRemaining > 0) {
+      if (assignment.remainingMinutes > 120) {
+        heavyTaskBonus = 10.0; // over 2 hours
+      } else if (assignment.remainingMinutes >= 60) {
+        heavyTaskBonus = 5.0; // between 1 and 2 hours
+      }
+    }
 
-    return urgencyScore + momentumScore + resumeBonus + typeBonus + burdenBonus;
+    return urgencyScore +
+        momentumScore +
+        resumeBonus +
+        typeBonus +
+        heavyTaskBonus;
   }
 
   List<RecommendedAction> getTopRecommendedSteps({

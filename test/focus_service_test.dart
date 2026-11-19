@@ -250,5 +250,60 @@ void main() {
       final scoreUndated = focusService.calculatePriorityScore(aUndated, relativeNow: now);
       expect(scoreUndated, equals(20.0));
     });
+
+    test('awards tiered bonus points based on task size for work due soon', () {
+      final now = DateTime(2026, 11, 19, 12, 0);
+      final dueTomorrow = now.add(const Duration(hours: 24));
+
+      // Small task: 30 minutes -> 0 bonus (80 pts total)
+      final aSmall = studyService.createAssignmentForCourse(
+        courseId: 'c1',
+        assignmentId: 'a_small',
+        title: 'Small Quiz',
+        dueDate: dueTomorrow,
+      );
+      studyService.addStepToAssignment(
+        assignmentId: 'a_small',
+        stepId: 's_sm',
+        title: 'Quiz Step',
+        estimatedMinutes: 30,
+      );
+
+      // Medium task: 90 minutes -> +5 bonus (85 pts total)
+      final aMed = studyService.createAssignmentForCourse(
+        courseId: 'c1',
+        assignmentId: 'a_med',
+        title: 'Medium Worksheet',
+        dueDate: dueTomorrow,
+      );
+      studyService.addStepToAssignment(
+        assignmentId: 'a_med',
+        stepId: 's_med',
+        title: 'Worksheet Step',
+        estimatedMinutes: 90,
+      );
+
+      // Heavy task: 150 minutes -> +10 bonus (90 pts total)
+      final aHeavy = studyService.createAssignmentForCourse(
+        courseId: 'c1',
+        assignmentId: 'a_heavy',
+        title: 'Heavy Project',
+        dueDate: dueTomorrow,
+      );
+      studyService.addStepToAssignment(
+        assignmentId: 'a_heavy',
+        stepId: 's_heavy',
+        title: 'Project Step',
+        estimatedMinutes: 150,
+      );
+
+      final scoreSmall = focusService.calculatePriorityScore(aSmall, relativeNow: now);
+      final scoreMed = focusService.calculatePriorityScore(aMed, relativeNow: now);
+      final scoreHeavy = focusService.calculatePriorityScore(aHeavy, relativeNow: now);
+
+      expect(scoreSmall, equals(80.0));
+      expect(scoreMed, equals(85.0));
+      expect(scoreHeavy, equals(90.0));
+    });
   });
 }
