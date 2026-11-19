@@ -1,68 +1,37 @@
 class StudyProfile {
-  static const int minGoalMinutes = 15;
-  static const int maxGoalMinutes = 720;
-  static const int minStepMinutes = 5;
-  static const int maxStepMinutes = 120;
-  static const int minBreakMinutes = 1;
-  static const int maxBreakMinutes = 60;
-
-  int _dailyStudyGoalMinutes;
-  int _dailyWorkloadLimitMinutes;
-  int _stepDurationMinutes;
-  int _breakDurationMinutes;
+  int dailyStudyGoalMinutes;
+  int dailyWorkloadLimitMinutes;
+  int stepDurationMinutes;
+  int breakDurationMinutes;
 
   StudyProfile({
-    int dailyStudyGoalMinutes = 120,
+    this.dailyStudyGoalMinutes = 120,
     int? dailyWorkloadLimitMinutes,
-    this._stepDurationMinutes = 25,
-    this._breakDurationMinutes = 5,
-  }) : _dailyStudyGoalMinutes = dailyStudyGoalMinutes,
-       _dailyWorkloadLimitMinutes = dailyWorkloadLimitMinutes ??
-           (dailyStudyGoalMinutes > 240 ? dailyStudyGoalMinutes : 240) {
-    _validate(
-      dailyStudyGoalMinutes: _dailyStudyGoalMinutes,
-      dailyWorkloadLimitMinutes: _dailyWorkloadLimitMinutes,
-      stepDurationMinutes: _stepDurationMinutes,
-      breakDurationMinutes: _breakDurationMinutes,
-    );
+    this.stepDurationMinutes = 25,
+    this.breakDurationMinutes = 5,
+  }) : dailyWorkloadLimitMinutes = dailyWorkloadLimitMinutes ?? 240 {
+    // raise limit if goal is bigger than limit
+    if (dailyStudyGoalMinutes > this.dailyWorkloadLimitMinutes) {
+      this.dailyWorkloadLimitMinutes = dailyStudyGoalMinutes;
+    }
+    _checkBounds();
   }
 
-  static void _validate({
-    required int dailyStudyGoalMinutes,
-    required int dailyWorkloadLimitMinutes,
-    required int stepDurationMinutes,
-    required int breakDurationMinutes,
-  }) {
-    if (dailyStudyGoalMinutes < minGoalMinutes ||
-        dailyStudyGoalMinutes > maxGoalMinutes) {
-      throw ArgumentError(
-        'daily study goal minutes must be between $minGoalMinutes and $maxGoalMinutes',
-      );
+  void _checkBounds() {
+    if (dailyStudyGoalMinutes < 15 || dailyStudyGoalMinutes > 720) {
+      throw ArgumentError('daily study goal must be between 15 and 720 minutes');
     }
     if (dailyWorkloadLimitMinutes < dailyStudyGoalMinutes ||
-        dailyWorkloadLimitMinutes > maxGoalMinutes) {
-      throw ArgumentError(
-        'daily workload limit minutes must be between daily study goal ($dailyStudyGoalMinutes) and $maxGoalMinutes',
-      );
+        dailyWorkloadLimitMinutes > 720) {
+      throw ArgumentError('workload limit cannot be less than daily goal');
     }
-    if (stepDurationMinutes < minStepMinutes ||
-        stepDurationMinutes > maxStepMinutes) {
-      throw ArgumentError(
-        'step duration minutes must be between $minStepMinutes and $maxStepMinutes',
-      );
+    if (stepDurationMinutes < 5 || stepDurationMinutes > 120) {
+      throw ArgumentError('step duration must be between 5 and 120 minutes');
     }
-    if (breakDurationMinutes < minBreakMinutes ||
-        breakDurationMinutes > maxBreakMinutes) {
-      throw ArgumentError(
-        'break duration minutes must be between $minBreakMinutes and $maxBreakMinutes',
-      );
+    if (breakDurationMinutes < 1 || breakDurationMinutes > 60) {
+      throw ArgumentError('break duration must be between 1 and 60 minutes');
     }
   }
-
-  int get dailyStudyGoalMinutes => _dailyStudyGoalMinutes;
-  int get dailyWorkloadLimitMinutes => _dailyWorkloadLimitMinutes;
-  int get stepDurationMinutes => _stepDurationMinutes;
-  int get breakDurationMinutes => _breakDurationMinutes;
 
   void update({
     int? dailyStudyGoalMinutes,
@@ -70,49 +39,47 @@ class StudyProfile {
     int? stepDurationMinutes,
     int? breakDurationMinutes,
   }) {
-    final newGoal = dailyStudyGoalMinutes ?? _dailyStudyGoalMinutes;
-    var newLimit = dailyWorkloadLimitMinutes ?? _dailyWorkloadLimitMinutes;
-    final newStep = stepDurationMinutes ?? _stepDurationMinutes;
-    final newBreak = breakDurationMinutes ?? _breakDurationMinutes;
-
-    // raise limit if goal is bigger than limit
-    if (newGoal > newLimit) {
-      newLimit = newGoal;
+    if (dailyStudyGoalMinutes != null) {
+      this.dailyStudyGoalMinutes = dailyStudyGoalMinutes;
+    }
+    if (dailyWorkloadLimitMinutes != null) {
+      this.dailyWorkloadLimitMinutes = dailyWorkloadLimitMinutes;
+    }
+    if (stepDurationMinutes != null) {
+      this.stepDurationMinutes = stepDurationMinutes;
+    }
+    if (breakDurationMinutes != null) {
+      this.breakDurationMinutes = breakDurationMinutes;
     }
 
-    _validate(
-      dailyStudyGoalMinutes: newGoal,
-      dailyWorkloadLimitMinutes: newLimit,
-      stepDurationMinutes: newStep,
-      breakDurationMinutes: newBreak,
-    );
+    // raise limit if goal is bigger than limit
+    if (this.dailyStudyGoalMinutes > this.dailyWorkloadLimitMinutes) {
+      this.dailyWorkloadLimitMinutes = this.dailyStudyGoalMinutes;
+    }
 
-    _dailyStudyGoalMinutes = newGoal;
-    _dailyWorkloadLimitMinutes = newLimit;
-    _stepDurationMinutes = newStep;
-    _breakDurationMinutes = newBreak;
+    _checkBounds();
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is StudyProfile &&
-        other._dailyStudyGoalMinutes == _dailyStudyGoalMinutes &&
-        other._dailyWorkloadLimitMinutes == _dailyWorkloadLimitMinutes &&
-        other._stepDurationMinutes == _stepDurationMinutes &&
-        other._breakDurationMinutes == _breakDurationMinutes;
+        other.dailyStudyGoalMinutes == dailyStudyGoalMinutes &&
+        other.dailyWorkloadLimitMinutes == dailyWorkloadLimitMinutes &&
+        other.stepDurationMinutes == stepDurationMinutes &&
+        other.breakDurationMinutes == breakDurationMinutes;
   }
 
   @override
   int get hashCode => Object.hash(
-    _dailyStudyGoalMinutes,
-    _dailyWorkloadLimitMinutes,
-    _stepDurationMinutes,
-    _breakDurationMinutes,
+    dailyStudyGoalMinutes,
+    dailyWorkloadLimitMinutes,
+    stepDurationMinutes,
+    breakDurationMinutes,
   );
 
   @override
   String toString() {
-    return 'StudyProfile(goal: ${_dailyStudyGoalMinutes}m, workloadLimit: ${_dailyWorkloadLimitMinutes}m, step: ${_stepDurationMinutes}m, break: ${_breakDurationMinutes}m)';
+    return 'StudyProfile(goal: ${dailyStudyGoalMinutes}m, limit: ${dailyWorkloadLimitMinutes}m, step: ${stepDurationMinutes}m, break: ${breakDurationMinutes}m)';
   }
 }
