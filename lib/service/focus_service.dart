@@ -11,7 +11,6 @@ class FocusService {
 
   List<FocusSession> get sessions => List.unmodifiable(_sessions);
 
-  // Log a completed focus timer session
   FocusSession recordFocusSession({
     required String id,
     required String courseId,
@@ -48,7 +47,6 @@ class FocusService {
     return session;
   }
 
-  // Atomically record timer session and mark step finished
   FocusSession recordSessionAndCompleteStep({
     required String id,
     required String courseId,
@@ -66,15 +64,12 @@ class FocusService {
       completedAt: completedAt,
     );
 
-    studyService.completeStep(
-      assignmentId: assignmentId,
-      stepId: stepId,
-    );
+    studyService.completeStep(assignmentId: assignmentId, stepId: stepId);
 
     return session;
   }
 
-  // Total study minutes logged for a specific course
+  // total study minutes for this course
   int getTotalStudyMinutesForCourse(String courseId) {
     var total = 0;
     for (final session in _sessions) {
@@ -85,7 +80,7 @@ class FocusService {
     return total;
   }
 
-  // Total study minutes logged on a specific calendar day
+  // total study minutes on this day
   int getDailyStudyMinutes(DateTime date, {String? courseId}) {
     final target = DateTime(date.year, date.month, date.day);
     var total = 0;
@@ -104,20 +99,20 @@ class FocusService {
     return total;
   }
 
-  // Progress towards daily study goal
+  // progress towards daily goal (e.g. 0.5 = 50%)
   double getDailyGoalProgress(DateTime date) {
     final goal = studyService.profile.dailyStudyGoalMinutes;
     if (goal == 0) return 1.0;
     return getDailyStudyMinutes(date) / goal;
   }
 
-  // Check if daily study goal has been reached
+  // check if daily goal is reached
   bool isDailyGoalMet(DateTime date) {
     return getDailyStudyMinutes(date) >=
         studyService.profile.dailyStudyGoalMinutes;
   }
 
-  // Calculate consecutive study streak (today is pending until midnight)
+  // count days in a row studied
   int getCurrentStudyStreakDays({DateTime? relativeNow}) {
     if (_sessions.isEmpty) return 0;
 
@@ -155,18 +150,22 @@ class FocusService {
     return streak;
   }
 
-  // Calculate all-time longest streak in days
+  // longest streak ever
   int getLongestStudyStreakDays() {
     if (_sessions.isEmpty) return 0;
 
-    final sortedDays = _sessions.map((s) {
-      return DateTime(
-        s.completedAt.year,
-        s.completedAt.month,
-        s.completedAt.day,
-      );
-    }).toSet().toList()
-      ..sort();
+    final sortedDays =
+        _sessions
+            .map((s) {
+              return DateTime(
+                s.completedAt.year,
+                s.completedAt.month,
+                s.completedAt.day,
+              );
+            })
+            .toSet()
+            .toList()
+          ..sort();
 
     var longest = 1;
     var current = 1;
@@ -188,7 +187,7 @@ class FocusService {
     return longest;
   }
 
-  // Check if task was worked on within the last 24 hours
+  // was this worked on today
   bool isTaskInProgress(String assignmentId, {DateTime? relativeNow}) {
     final now = relativeNow ?? DateTime.now();
     final cutoff = now.subtract(const Duration(hours: 24));
@@ -197,7 +196,7 @@ class FocusService {
     );
   }
 
-  // Priority scoring with overdue deprioritization and calm baseline for undated work
+  // calculate priority score for an assignment
   double calculatePriorityScore(
     Assignment assignment, {
     DateTime? relativeNow,
@@ -214,7 +213,7 @@ class FocusService {
       hoursRemaining = diff.inHours;
 
       if (hoursRemaining < -168) {
-        // Overdue by more than 7 days: deprioritize so upcoming deadlines aren't blocked
+        // more than 7 days late: lower score so current work comes first
         urgencyScore = 40.0;
       } else if (hoursRemaining <= 0) {
         urgencyScore = 100.0;
@@ -228,8 +227,9 @@ class FocusService {
     }
 
     final momentumScore = assignment.progress * 30.0;
-    final resumeBonus =
-        isTaskInProgress(assignment.id, relativeNow: now) ? 15.0 : 0.0;
+    final resumeBonus = isTaskInProgress(assignment.id, relativeNow: now)
+        ? 15.0
+        : 0.0;
 
     double typeBonus;
     switch (assignment.type) {
@@ -244,7 +244,8 @@ class FocusService {
         break;
     }
 
-    final burdenBonus = (assignment.remainingMinutes > 120 &&
+    final burdenBonus =
+        (assignment.remainingMinutes > 120 &&
             hoursRemaining != null &&
             hoursRemaining <= 48 &&
             hoursRemaining > 0)
@@ -254,7 +255,6 @@ class FocusService {
     return urgencyScore + momentumScore + resumeBonus + typeBonus + burdenBonus;
   }
 
-  // Diverse recommendations selecting the top pending step from distinct assignments
   List<RecommendedAction> getTopRecommendedSteps({
     int limit = 3,
     DateTime? relativeNow,
@@ -272,26 +272,27 @@ class FocusService {
           relativeNow: relativeNow,
         );
 
-        allActions.add(RecommendedAction(
-          step: assignment.pendingSteps.first,
-          assignmentId: assignment.id,
-          assignmentTitle: assignment.title,
-          dueDate: assignment.dueDate,
-          courseId: course.id,
-          courseName: course.name,
-          courseColor: course.color,
-          priorityScore: score,
-        ));
+        allActions.add(
+          RecommendedAction(
+            step: assignment.pendingSteps.first,
+            assignmentId: assignment.id,
+            assignmentTitle: assignment.title,
+            dueDate: assignment.dueDate,
+            courseId: course.id,
+            courseName: course.name,
+            courseColor: course.color,
+            priorityScore: score,
+          ),
+        );
       }
     }
 
-    // Sort highest priority score first
+    // highest score first
     allActions.sort((a, b) => b.priorityScore.compareTo(a.priorityScore));
 
     return allActions.take(limit).toList();
   }
 
-  // Get the single top recommended step
   RecommendedAction? getTopRecommendedStep({DateTime? relativeNow}) {
     final steps = getTopRecommendedSteps(limit: 1, relativeNow: relativeNow);
     return steps.isNotEmpty ? steps.first : null;

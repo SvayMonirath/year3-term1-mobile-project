@@ -75,7 +75,7 @@ class StudyProfile {
     final newStep = stepDurationMinutes ?? _stepDurationMinutes;
     final newBreak = breakDurationMinutes ?? _breakDurationMinutes;
 
-    // auto-adjust limit if goal exceeds current limit to prevent validation crashes
+    // raise limit if goal is bigger than limit
     if (newGoal > newLimit) {
       newLimit = newGoal;
     }

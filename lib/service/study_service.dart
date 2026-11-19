@@ -66,7 +66,6 @@ class StudyService {
     }
   }
 
-  // Create an assignment with an optional due date (future or past backlog dates supported)
   Assignment createAssignmentForCourse({
     required String courseId,
     required String assignmentId,
@@ -135,7 +134,6 @@ class StudyService {
     }
   }
 
-  // Add step to an active assignment; defaults to user's configured step duration
   WorkStep addStepToAssignment({
     required String assignmentId,
     required String stepId,
@@ -185,7 +183,7 @@ class StudyService {
 
     step.complete();
 
-    // auto finish assignment if all steps are completed
+    // finish homework if all steps are done
     if (assignment.pendingSteps.isEmpty && assignment.steps.isNotEmpty) {
       assignment.completeAll();
     }
@@ -209,7 +207,6 @@ class StudyService {
     }
   }
 
-  // Retrieve active assignments due on a specific calendar day
   List<Assignment> getAssignmentsDueOn(
     DateTime date, {
     bool includeOverdue = false,
@@ -233,7 +230,6 @@ class StudyService {
     return result;
   }
 
-  // Calculate remaining workload minutes for tasks due on a given day
   int calculateDailyWorkloadMinutes(
     DateTime date, {
     bool includeOverdue = false,
@@ -249,7 +245,6 @@ class StudyService {
     return total;
   }
 
-  // Check if homework due on a given day exceeds user capacity
   bool isWorkloadOverloaded(
     DateTime date, {
     int? dailyLimitMinutes,

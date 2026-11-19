@@ -57,7 +57,7 @@ class WorkStep {
     _isCompleted = false;
   }
 
-  // two steps are the same if they have the same id instead of comparing by memory address
+  // compare by id not by memory address
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
