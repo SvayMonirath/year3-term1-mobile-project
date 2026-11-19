@@ -1,4 +1,3 @@
-import '../model/course.dart';
 import '../model/assignment.dart';
 import '../model/focus_session.dart';
 import '../model/recommended_action.dart';
@@ -262,7 +261,7 @@ class FocusService {
   }) {
     if (limit <= 0) return [];
 
-    final List<_AssignmentCandidate> candidates = [];
+    final List<RecommendedAction> allActions = [];
 
     for (final course in studyService.courses) {
       for (final assignment in course.activeAssignments) {
@@ -272,36 +271,24 @@ class FocusService {
           assignment,
           relativeNow: relativeNow,
         );
-        candidates.add(_AssignmentCandidate(
-          course: course,
-          assignment: assignment,
-          score: score,
+
+        allActions.add(RecommendedAction(
+          step: assignment.pendingSteps.first,
+          assignmentId: assignment.id,
+          assignmentTitle: assignment.title,
+          dueDate: assignment.dueDate,
+          courseId: course.id,
+          courseName: course.name,
+          courseColor: course.color,
+          priorityScore: score,
         ));
       }
     }
 
-    candidates.sort((a, b) => b.score.compareTo(a.score));
+    // Sort highest priority score first
+    allActions.sort((a, b) => b.priorityScore.compareTo(a.priorityScore));
 
-    final List<RecommendedAction> results = [];
-    for (final candidate in candidates) {
-      final step = candidate.assignment.pendingSteps.first;
-      results.add(RecommendedAction(
-        step: step,
-        assignmentId: candidate.assignment.id,
-        assignmentTitle: candidate.assignment.title,
-        dueDate: candidate.assignment.dueDate,
-        courseId: candidate.course.id,
-        courseName: candidate.course.name,
-        courseColor: candidate.course.color,
-        priorityScore: candidate.score,
-      ));
-
-      if (results.length >= limit) {
-        break;
-      }
-    }
-
-    return results;
+    return allActions.take(limit).toList();
   }
 
   // Get the single top recommended step
@@ -309,16 +296,4 @@ class FocusService {
     final steps = getTopRecommendedSteps(limit: 1, relativeNow: relativeNow);
     return steps.isNotEmpty ? steps.first : null;
   }
-}
-
-class _AssignmentCandidate {
-  final Course course;
-  final Assignment assignment;
-  final double score;
-
-  _AssignmentCandidate({
-    required this.course,
-    required this.assignment,
-    required this.score,
-  });
 }
