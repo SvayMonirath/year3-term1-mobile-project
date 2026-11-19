@@ -2,8 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile_project/model/study_profile.dart';
 
 void main() {
-  group('StudyProfile Model', () {
-    test('instantiates with expected default values', () {
+  group('StudyProfile', () {
+    test('has default study and break settings', () {
       final profile = StudyProfile();
 
       expect(profile.dailyStudyGoalMinutes, equals(120));
@@ -12,7 +12,7 @@ void main() {
       expect(profile.breakDurationMinutes, equals(5));
     });
 
-    test('auto-elevates dailyWorkloadLimitMinutes if dailyStudyGoalMinutes exceeds it', () {
+    test('raises workload limit when study goal is higher', () {
       final profile = StudyProfile();
       profile.update(dailyStudyGoalMinutes: 300);
 
@@ -20,7 +20,7 @@ void main() {
       expect(profile.dailyWorkloadLimitMinutes, equals(300));
     });
 
-    test('updates all fields successfully within valid boundaries', () {
+    test('updates all settings with valid numbers', () {
       final profile = StudyProfile();
       profile.update(
         dailyStudyGoalMinutes: 180,
@@ -35,7 +35,7 @@ void main() {
       expect(profile.breakDurationMinutes, equals(10));
     });
 
-    test('rejects out of bound values', () {
+    test('rejects numbers that are too small or too big', () {
       expect(
         () => StudyProfile(dailyStudyGoalMinutes: 10),
         throwsA(isA<ArgumentError>()),
@@ -50,7 +50,7 @@ void main() {
       );
     });
 
-    test('supports value equality and hash code', () {
+    test('is equal when all settings match', () {
       final p1 = StudyProfile(
         dailyStudyGoalMinutes: 100,
         dailyWorkloadLimitMinutes: 200,

@@ -4,8 +4,8 @@ import 'package:mobile_project/model/work_step.dart';
 import 'package:mobile_project/model/recommended_action.dart';
 
 void main() {
-  group('RecommendedAction Read Model', () {
-    test('instantiates with all required and optional properties', () {
+  group('RecommendedAction', () {
+    test('holds task details, course info, and priority score', () {
       final step = WorkStep(id: 's1', title: 'Write Intro', estimatedMinutes: 25);
       final dueDate = DateTime.now().add(const Duration(days: 2));
 
@@ -30,7 +30,7 @@ void main() {
       expect(action.priorityScore, equals(85.5));
     });
 
-    test('supports equality and hash code', () {
+    test('is equal when task and course match', () {
       final step = WorkStep(id: 's1', title: 'Step 1');
       final a1 = RecommendedAction(
         step: step,

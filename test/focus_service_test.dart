@@ -19,8 +19,8 @@ void main() {
     studyService.addCourse(course2);
   });
 
-  group('FocusService - Session Recording & Daily Goals', () {
-    test('records session and calculates daily & course totals', () {
+  group('FocusService - Study Sessions and Goals', () {
+    test('records study session and counts total minutes', () {
       final now = DateTime(2026, 11, 19, 10, 0);
       studyService.createAssignmentForCourse(
         courseId: 'c1',
@@ -49,7 +49,7 @@ void main() {
       expect(focusService.isDailyGoalMet(now), isFalse);
     });
 
-    test('atomically records session and marks step complete', () {
+    test('records session and marks step done together', () {
       studyService.createAssignmentForCourse(
         courseId: 'c1',
         assignmentId: 'a1',
@@ -76,8 +76,8 @@ void main() {
     });
   });
 
-  group('FocusService - Consecutive Study Streaks', () {
-    test('calculates consecutive streak and allows pending today', () {
+  group('FocusService - Study Streaks', () {
+    test('counts consecutive study days and allows pending today', () {
       final today = DateTime(2026, 11, 19);
       final yesterday = DateTime(2026, 11, 18);
       final twoDaysAgo = DateTime(2026, 11, 17);
@@ -111,7 +111,7 @@ void main() {
         completedAt: twoDaysAgo,
       );
 
-      // Streak is preserved at 2 because today is still open
+      // Streak stays at 2 because today is still open
       expect(
         focusService.getCurrentStudyStreakDays(relativeNow: today),
         equals(2),
@@ -132,7 +132,7 @@ void main() {
       );
     });
 
-    test('resets streak to 0 when consecutive day chain is broken', () {
+    test('resets streak to 0 if a day is missed', () {
       final today = DateTime(2026, 11, 19);
       final threeDaysAgo = DateTime(2026, 11, 16);
 
@@ -156,7 +156,7 @@ void main() {
         completedAt: threeDaysAgo,
       );
 
-      // Yesterday and today were missed -> streak is 0
+      // Missed yesterday and today -> streak is 0
       expect(
         focusService.getCurrentStudyStreakDays(relativeNow: today),
         equals(0),
@@ -164,11 +164,11 @@ void main() {
     });
   });
 
-  group('FocusService - Multi-Course Recommendations & Edge Cases', () {
-    test('returns diverse recommendations across distinct assignments', () {
+  group('FocusService - Recommended Steps', () {
+    test('picks one step from each top assignment', () {
       final now = DateTime(2026, 11, 19, 12, 0);
 
-      // Assignment 1 has 3 steps (Course 1)
+      // Assignment 1 has 2 steps (Course 1)
       studyService.createAssignmentForCourse(
         courseId: 'c1',
         assignmentId: 'a1',
@@ -186,7 +186,7 @@ void main() {
         title: 'Step 2 of A1',
       );
 
-      // Assignment 2 has 2 steps (Course 2)
+      // Assignment 2 has 1 step (Course 2)
       studyService.createAssignmentForCourse(
         courseId: 'c2',
         assignmentId: 'a2',
@@ -216,19 +216,19 @@ void main() {
       expect(recommendations[1].courseName, equals('Cloud Computing'));
     });
 
-    test('scores undated assignments with calm baseline and deprioritizes stale overdue tasks', () {
+    test('scores undated tasks and lowers score for old overdue tasks', () {
       final now = DateTime(2026, 11, 19, 12, 0);
 
-      // Stale overdue assignment (>7 days ago)
+      // Old overdue task (>7 days ago)
       final aStale = studyService.createAssignmentForCourse(
         courseId: 'c1',
         assignmentId: 'a_stale',
-        title: 'Ancient Homework',
+        title: 'Old Homework',
         dueDate: now.subtract(const Duration(days: 10)),
       );
       final scoreStale = focusService.calculatePriorityScore(aStale, relativeNow: now);
 
-      // Active urgent assignment (due in 8 hours)
+      // Urgent task (due in 8 hours)
       final aUrgent = studyService.createAssignmentForCourse(
         courseId: 'c1',
         assignmentId: 'a_urgent',
@@ -237,10 +237,10 @@ void main() {
       );
       final scoreUrgent = focusService.calculatePriorityScore(aUrgent, relativeNow: now);
 
-      // Urgent assignment must outrank stale overdue assignment!
+      // Urgent task must get higher score than old overdue task
       expect(scoreUrgent, greaterThan(scoreStale));
 
-      // Undated assignment receives 20 pts baseline
+      // Undated task gets 20 points
       final aUndated = studyService.createAssignmentForCourse(
         courseId: 'c1',
         assignmentId: 'a_undated',
@@ -251,7 +251,7 @@ void main() {
       expect(scoreUndated, equals(20.0));
     });
 
-    test('awards tiered bonus points based on task size for work due soon', () {
+    test('gives bonus points for medium and heavy tasks due soon', () {
       final now = DateTime(2026, 11, 19, 12, 0);
       final dueTomorrow = now.add(const Duration(hours: 24));
 

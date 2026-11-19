@@ -13,8 +13,8 @@ void main() {
     service.addCourse(testCourse);
   });
 
-  group('StudyService - Coursework Lifecycle & Cascading', () {
-    test('creates course, assignment with steps, and handles cascading delete', () {
+  group('StudyService - Courses and Assignments', () {
+    test('deleting a course also deletes its assignments and steps', () {
       final dueDate = DateTime.now().add(const Duration(days: 3));
       final assignment = service.createAssignmentForCourse(
         courseId: 'c1',
@@ -41,7 +41,7 @@ void main() {
       expect(service.findAssignmentById('a1'), isNull);
     });
 
-    test('supports creating assignments with optional or past due dates', () {
+    test('allows creating tasks with no due date or past due dates', () {
       // Optional undated assignment
       final undated = service.createAssignmentForCourse(
         courseId: 'c1',
@@ -63,7 +63,7 @@ void main() {
       expect(overdue.isOverdue, isTrue);
     });
 
-    test('coordinates multi-entity step completion and reopening', () {
+    test('completing all steps marks assignment done and reopening uncompletes it', () {
       final dueDate = DateTime.now().add(const Duration(days: 2));
       service.createAssignmentForCourse(
         courseId: 'c1',
@@ -88,7 +88,7 @@ void main() {
       expect(assignment.pendingSteps.length, equals(1));
     });
 
-    test('prevents adding steps to completed assignments', () {
+    test('cannot add steps to a completed assignment', () {
       final assignment = service.createAssignmentForCourse(
         courseId: 'c1',
         assignmentId: 'a_done',
@@ -108,8 +108,8 @@ void main() {
     });
   });
 
-  group('StudyService - Workload & StudyProfile', () {
-    test('calculates daily workload minutes and detects overload', () {
+  group('StudyService - Workload and Profile', () {
+    test('calculates daily study minutes and warns when overloaded', () {
       final targetDate = DateTime(2026, 11, 20);
 
       service.createAssignmentForCourse(
@@ -149,7 +149,7 @@ void main() {
       );
     });
 
-    test('updates study profile using new intuitive field names', () {
+    test('updates study profile settings', () {
       service.updateProfile(
         dailyStudyGoalMinutes: 150,
         dailyWorkloadLimitMinutes: 300,

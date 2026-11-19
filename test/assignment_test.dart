@@ -3,8 +3,8 @@ import 'package:mobile_project/model/assignment.dart';
 import 'package:mobile_project/model/work_step.dart';
 
 void main() {
-  group('Assignment Model', () {
-    test('instantiates with optional null dueDate', () {
+  group('Assignment', () {
+    test('can be created without a due date', () {
       final assignment = Assignment(
         id: 'a1',
         courseId: 'c1',
@@ -16,7 +16,7 @@ void main() {
       expect(assignment.isOverdue, isFalse);
     });
 
-    test('correctly computes isOverdue when dueDate is provided', () {
+    test('checks if task is overdue based on due date', () {
       final pastDate = DateTime.now().subtract(const Duration(hours: 1));
       final futureDate = DateTime.now().add(const Duration(days: 2));
 
@@ -40,7 +40,7 @@ void main() {
       expect(overdueAssignment.isOverdue, isFalse);
     });
 
-    test('supports updating dueDate to null or future date', () {
+    test('can clear or change due date', () {
       final assignment = Assignment(
         id: 'a1',
         courseId: 'c1',
@@ -53,7 +53,7 @@ void main() {
       expect(assignment.isOverdue, isFalse);
     });
 
-    test('manages steps and progress calculations accurately', () {
+    test('tracks steps and progress percentage', () {
       final assignment = Assignment(
         id: 'a1',
         courseId: 'c1',
